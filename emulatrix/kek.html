@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+</head>
+
+<body>
+<script type='module'>
+import {Archive} from './libarchive.js';
+Archive.init({
+	workerUrl: 'worker-bundle.js',
+});
+
+fetch('super mario bros (w) [!].zip').then(function (r) {
+	return r.arrayBuffer()
+}).then(function (ab) {
+	Archive.open(new Blob([ab])).then(function (filesObj) {
+		return filesObj.extractFiles();
+	}).then(function (files) {
+		console.log(files);
+	})
+})
+</script>
+</body>
+
+</html>

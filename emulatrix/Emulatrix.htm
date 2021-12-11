@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Emulatrix</title>
+		<link rel="stylesheet" href="Emulatrix.css">
+	</head>
+	<body>
+		<script src="libarchloader.js" type="module" charset="utf-8"></script>
+		<script src="pako.js" type="text/javascript" charset="utf-8"></script>
+		<script src="UZIP.js" type="text/javascript" charset="utf-8"></script>
+		<!-- <script src="virtualJoystick.js"></script> -->
+
+		<script>
+			function isMobileDevice(){return!!(navigator.userAgent.match(/Android/i)||navigator.userAgent.match(/webOS/i)||navigator.userAgent.match(/iPhone/i)||navigator.userAgent.match(/iPad/i)||navigator.userAgent.match(/iPod/i)||navigator.userAgent.match(/BlackBerry/i)||navigator.userAgent.match(/Windows Phone/i))}
+			function alertCustom(title,message,accept){try{var alertContainer = document.createElement("div");alertContainer.style.position = "fixed";alertContainer.style.top = 0;alertContainer.style.bottom = 0;alertContainer.style.left = 0;alertContainer.style.right = 0;alertContainer.style.zIndex = 9999;alertContainer.style.backgroundColor = "rgba(0,0,0,0.5)";var alertForm = document.createElement("div");alertForm.style.position = "relative";alertForm.style.top = "50%";alertForm.style.left = 0;alertForm.style.right = 0;alertForm.style.marginLeft = "auto";alertForm.style.marginRight = "auto";alertForm.style.transform = "translateY(-50%)";alertForm.style.width = "400px";alertForm.style.backgroundColor = "#f2f2f2";alertForm.style.textAlign = "center";var alertTitle = document.createElement("div");alertTitle.style.textAlign = "left";alertTitle.style.paddingLeft = "10px";alertTitle.style.backgroundColor = "#3a76b1";alertTitle.style.fontFamily = "Arial";alertTitle.style.fontSize = "16px";alertTitle.style.fontWeight = "bold";alertTitle.style.color = "white";alertTitle.style.lineHeight = 2.5;alertTitle.innerHTML = title;var alertMessage = document.createElement("div");alertMessage.style.padding = "20px";alertMessage.style.fontFamily = "Arial";alertMessage.style.fontSize = "16px";alertMessage.style.color = "black";alertMessage.style.textAlign = "center";alertMessage.style.lineHeight = 2;alertMessage.innerHTML = message;var alertButton = document.createElement("div");alertButton.style.padding = "10px";alertButton.style.backgroundColor = "#d2d2d2";alertButton.style.border = "1px solid #b2b2b2";alertButton.style.fontFamily = "Arial";alertButton.style.fontSize = "16px";alertButton.style.color = "black";alertButton.style.textAlign = "center";alertButton.style.lineHeight = 1.5;alertButton.style.display = "inline-block";alertButton.style.marginBottom = "10px";alertButton.style.paddingLeft = "40px";alertButton.style.paddingRight = "40px";alertButton.style.cursor = "pointer";alertButton.addEventListener("click",function(event){document.body.removeChild(alertContainer);});alertButton.innerHTML = accept;alertForm.appendChild(alertTitle);alertForm.appendChild(alertMessage);alertForm.appendChild(alertButton);alertContainer.appendChild(alertForm);document.body.appendChild(alertContainer);}catch(err){}}
+
+			var userLanguage = window.navigator.userLanguage || window.navigator.language;
+
+			var ROMDATA = "";
+			var ROMNAME = "";
+			var DOSGAME = false;
+			var MOVEMENTS_IDLE = 0;
+			var STATE_CHECK_TIMES = 8;
+			var STRING_HOW_DESKTOP1 = "";
+			var STRING_HOW_DESKTOP2 = "";
+			var STRING_HOW_MOBILE = "";
+			var STRING_HOW_MOBILE_IOS = "";
+			var STRING_SAFARI = "";
+			var STRING_INSERTCOIN = "";
+			var STRING_SELECTGAME = "";
+			var STRING_UPLOADFILE = "";
+			var STRING_DOWNLOADFILE = "";
+			var STRING_LOADSTATE = "";
+			var STRING_SAVESTATE = "";
+			var STRING_GOBACK = "";
+			var STRING_RELOAD = "";
+			var STRING_READINGFILE = "";
+			var STRING_STARTINGEMULATOR = "";
+			var STRING_SELECTFOLDER = "";
+			var STRING_KEYBOARDANDMOUSE = "";
+			var STRING_ERROREXTENSION_TITLE = "";
+			var STRING_ERROREXTENSION_MESSAGE = "";
+			var STRING_ERROREXTENSION_ACCEPT = "";
+			var STRING_SAVING = "";
+			var STRING_LOADING = "";
+			var STRING_SAVED = "";
+			var STRING_SOUND = "";
+			var STRING_DECREASE = "";
+			var STRING_INCREASE = "";
+
+			// CHECKING THE USER LANGUAGE
+			if (userLanguage.substring(0,2)=="es")
+				{
+				STRING_HOW_DESKTOP1 = "&iquest;C&oacute;mo funciona?";
+				STRING_HOW_DESKTOP2 = "Haga click en el &iacute;cono rojo ubicado en el extremo inferior de la pantalla y luego seleccione de su computadora el archivo del juego que desea jugar.<br />Para cargar juegos de DOS, crea un archivo ZIP con los archivos del juego y &aacute;brelo con Emulatrix.<br />Al iniciarse, se intentar&aacute; ejecutar AUTORUN.BAT.<br />Para cargar maquinas virtuales, crea un archivo ZIP con la imagen del disco con el nombre c.img.";
+				STRING_HOW_MOBILE = "Toca el &iacute;cono inferior,<br />selecciona un ROM de tu m&oacute;vil<br />y comienza a jugar al MegaDrive,<br/>NES, SNES, Gameboy, MAME32 y DOS.";
+				STRING_HOW_MOBILE_IOS = "Emulatrix<br/>no es compatible<br/>con sistemas iOS."
+				STRING_SAFARI = "Emulatrix<br/>no es compatible<br/>con el navegador Web Safari."
+				STRING_INSERTCOIN = "INSERTAR MONEDA = 1";
+				STRING_SELECTGAME = "Seleccionar juego";
+				STRING_UPLOADFILE = "Subir archivo";
+				STRING_DOWNLOADFILE = "Descargar archivo";
+				STRING_LOADSTATE = "Subir estado del juego";
+				STRING_SAVESTATE = "Descargar estado del juego";
+				STRING_GOBACK = "Volver al men" + String.fromCharCode(250) + " principal";
+				STRING_RELOAD = "Recargar juego";
+				STRING_READINGFILE = "Leyendo archivo...";
+				STRING_STARTINGEMULATOR = "Iniciando emulador...";
+				STRING_SELECTFOLDER = "Indique la carpeta";
+				STRING_KEYBOARDANDMOUSE = "TECLADO<br/>Y MOUSE";
+				STRING_ERROREXTENSION_TITLE = "MENSAJE";
+				STRING_ERROREXTENSION_MESSAGE = "Por favor verifique que el juego se encuentre en<br />formato NES, SMC, SFC, SRM, GB, GBC,<br />GBA, BIN, SMD, MD o ZIP.";
+				STRING_ERROREXTENSION_ACCEPT = "Aceptar";
+				STRING_SAVING = "Guardando, por favor espere...";
+				STRING_LOADING = "Cargando, por favor espere...";
+				STRING_SAVED = "Archivo guardado en Descargas.";
+				STRING_SOUND = "Sonido en el juego";
+				STRING_DECREASE = "Reducir ciclos";
+				STRING_INCREASE = "Incrementar ciclos";
+				}
+				else
+				{
+				STRING_HOW_DESKTOP1 = "How does it work?";
+				STRING_HOW_DESKTOP2 = "Please click in the red icon located at the bottom of the screen and then select from your computer the file of the game that you want to play.<br />In order to play a DOS game, you must create a ZIP file with all the game files and open it in Emulatrix.<br />On booting, it will try to run AUTORUN.BAT.<br />In order to boot virtual machines, you must create a ZIP file with the disk image with the name c.img.";
+				STRING_HOW_MOBILE = "Touch the icon below,<br />select a ROM from your phone<br />and start playing to the MegaDrive,<br/>NES, SNES, Gameboy, MAME32 and DOS.";
+				STRING_HOW_MOBILE_IOS = "Emulatrix<br/>is not compatible<br/>with iOS systems."
+				STRING_SAFARI = "Emulatrix<br/>is not compatible<br/>with the Safari Web browser."
+				STRING_INSERTCOIN = "INSERT COIN = 1";
+				STRING_SELECTGAME = "Select game";
+				STRING_UPLOADFILE = "Upload file";
+				STRING_DOWNLOADFILE = "Download file";
+				STRING_LOADSTATE = "Upload game state";
+				STRING_SAVESTATE = "Download game state";
+				STRING_GOBACK = "Go back to the main menu";
+				STRING_RELOAD = "Reload game";
+				STRING_READINGFILE = "Reading file...";
+				STRING_STARTINGEMULATOR = "Starting emulator...";
+				STRING_SELECTFOLDER = "Select the folder";
+				STRING_KEYBOARDANDMOUSE = "KEYBOARD<br/>AND MOUSE";
+				STRING_ERROREXTENSION_TITLE = "MESSAGE";
+				STRING_ERROREXTENSION_MESSAGE = "Please check that the game file has an allowed<br />format: NES, SMC, SFC, SRM, GB, GBC,<br />GBA, BIN, SMD, MD or ZIP.";
+				STRING_ERROREXTENSION_ACCEPT = "OK";
+				STRING_SAVING = "Saving, please wait...";
+				STRING_LOADING = "Loading, please wait...";
+				STRING_SAVED = "File saved in Downloads.";
+				STRING_SOUND = "Game sound";
+				STRING_DECREASE = "Decrease cycles";
+				STRING_INCREASE = "Increase cycles";
+				}
+				
+				function runEmulator (files){
+					var file = files[0];
+					
+					var ext = file.name.split('.').pop().toLowerCase();
+					
+					if (ext === '7z') {
+						Archive.open(file).then(function (filesObj) {
+							return filesObj.extractFiles();
+						}).then(function (files) {
+							var first = Object.keys(files)[0];
+							var ext = first.split('.').pop().toLowerCase();
+		
+							if (ext === 'nes') {
+								runEmulator_(files[first]);
+							}
+							else {
+								runEmulator_(file)
+							}
+						})
+					}
+					
+					var filereader = new FileReader();
+					
+					filereader.onload = function() {
+						var fileAB = this.result;
+						
+						if (ext !== 'zip') {
+							runEmulator_(file, fileAB);
+							return;
+						}
+							
+						var zip = UZIP.parse(fileAB);
+						var first = Object.keys(zip)[0];
+						var fileAB = zip[first].buffer;
+
+						runEmulator_({
+							name: first,
+						}, fileAB)
+					}
+					filereader.readAsArrayBuffer(file);
+					
+					//получить выбранный файл
+					//читаем его в буфер
+					//если его расширение не архив
+					//и входит в разрешённые
+						//закидываем в ран
+					//если расширение архив
+						//разархивируем
+						//получаем первый файл
+							//если его расширение из разрешённых
+								//закидываев ран
+					
+					
+				}
+
+			function runEmulator_(file, fileAB)
+				{
+				try
+					{
+					// GETTING THE FILE EXTENSION
+					var extension = file.name.split(".").pop().toLowerCase();
+
+					// CHECKING THE FILE EXTENSION
+					if (extension=="nes" | extension=="smc" | extension=="sfc" | extension=="srm" | extension=="gb" | extension=="gbc" | extension=="gba" | extension=="bin" | extension=="smd" | extension=="md" | extension=="zip")
+						{
+						// CLEARING THE CONTAINER FROM ANY GAME IN PROGRESS
+						document.getElementById("container").contentDocument.location.replace("about:blank");
+
+						
+							// SETTING THE FILE CONTENT FOR THE EMULATORS
+							//ROMDATA = this.result;
+							ROMDATA = fileAB;
+							ROMNAME = file.name;
+							ROMNAME = ROMNAME;
+							DOSGAME = false;
+
+							// HIDING THE GUI
+							document.getElementsByClassName("gui_container")[0].style.display = "none";
+
+							// DISPLAYING THE EMULATOR CONTAINER
+							document.getElementById("container").style.display = "block";
+							document.getElementById("container").focus();
+
+							// HIDING THE PLEASE WAIT ANIMATION
+							document.getElementsByClassName("gui_pleasewait")[0].style.display = "none";
+
+							// CLEARING THE SELECTED FILE VALUE
+							document.getElementById("gui_controls_file").value = null;
+
+							// CHECKING IF IT IS A MOBILE DEVICE
+							if (isMobileDevice()==true)
+								{
+								// SHOWING THE GO BACK BUTTON (FOR MOBILE DEVICES)
+								document.getElementsByClassName("gui_goback_mobile")[0].style.display = "block";
+
+								// SHOWING THE RELOAD BUTTON (FOR MOBILE DEVICES)
+								document.getElementsByClassName("gui_reload_mobile")[0].style.display = "block";
+								}
+
+							// UPDATING THE TOOLTIPS FOR THE DOWNLOAD AND UPLOAD ICON
+							document.getElementsByClassName("gui_download")[0].title = STRING_SAVESTATE;
+							document.getElementsByClassName("gui_uploadsave")[0].title = STRING_LOADSTATE;
+
+							// UPDATING THE WEB TITLE
+							//parent.updateTitle();
+
+							// CHECKING THE ROM EXTENSION AND STARTING THE REQUIRED EMULATOR FOR THE SELECTED ROM
+							if (extension=="nes")
+								{
+								document.getElementById("container").contentDocument.location.replace("Emulatrix_Nintendo.htm");
+								}
+							else if (extension=="smc" | extension=="sfc" | extension=="srm")
+								{
+								document.getElementById("container").contentDocument.location.replace("Emulatrix_SuperNintendo.htm");
+								}
+							else if (extension=="gb" | extension=="gbc")
+								{
+								document.getElementById("container").contentDocument.location.replace("Emulatrix_GameBoy.htm");
+								}
+							else if (extension=="gba")
+								{
+								document.getElementById("container").contentDocument.location.replace("Emulatrix_GameBoyAdvance.htm");
+								}
+							else if (extension=="bin" | extension=="smd" | extension=="md")
+								{
+								document.getElementById("container").contentDocument.location.replace("Emulatrix_SegaGenesis.htm");
+								}
+							else if (extension=="zip")
+								{
+								// RENAMING THE ROMNAME TO LOWER CASE FOR LATER CHECKING
+								ROMNAME = ROMNAME.toLowerCase();
+
+								// CHECKING IF THE FILE IS A MAME32 OR DOSBOX GAME
+								if (MAME32_ROM_LIST.indexOf("|" + ROMNAME + "|")===-1)
+									{
+									// UPDATING THE TOOLTIPS FOR THE DOWNLOAD AND UPLOAD ICON
+									document.getElementsByClassName("gui_download")[0].title = STRING_DOWNLOADFILE;
+									document.getElementsByClassName("gui_uploadsave")[0].title = STRING_UPLOADFILE;
+
+									// UPDATING THE DOSGAME VARIABLE IN ORDER TO NOT SHOW THE SOUND TOGGLE BUTTON
+									DOSGAME = true;
+
+									document.getElementById("container").contentDocument.location.replace("Emulatrix_DOSBox.htm");
+									}
+									else
+									{
+									document.getElementById("container").contentDocument.location.replace("Emulatrix_MAME32.htm");
+									}
+								}
+
+							// SHOWING ALL THE BUTTONS
+							goBackButtonResetIncrement();
+
+						// SHOWING THE PLEASE WAIT ANIMATION
+						//document.getElementsByClassName("gui_pleasewait")[0].style.display = "block";
+
+						}
+						else
+						{
+						// CLEARING THE SELECTED FILE VALUE
+						document.getElementById("gui_controls_file").value = null;
+
+						// SHOWING AN ALERT MESSAGE WITH ALL THE COMPATIBLE FILE FORMATS
+						alertCustom(STRING_ERROREXTENSION_TITLE,STRING_ERROREXTENSION_MESSAGE,STRING_ERROREXTENSION_ACCEPT);
+						}
+					}
+					catch(err)
+					{
+					}
+				}
+
+			function reload()
+				{
+				try
+					{
+					// CHECKING IF THE GAME IS A DOS GAME
+					if (DOSGAME==true)
+						{
+						// RELOADING THE IFRAME
+						document.getElementById("container").contentDocument.location.reload(true);
+						}
+						else
+						{
+						// RUNNING THE FUNCTION THAT IS LOCATED WITHIN THE IFRAME DOCUMENT TO RELOAD THE ROM
+						document.getElementById("container").contentWindow.reloadROM();
+						}
+					}
+					catch(err)
+					{
+					}
+				}
+
+			function goBack()
+				{
+				try
+					{
+					// SHOWING THE GUI
+					document.getElementsByClassName("gui_container")[0].style.display = "block";
+
+					// CLEARING THE CONTAINER FROM ANY GAME IN PROGRESS
+					document.getElementById("container").contentDocument.location.replace("about:blank");
+
+					// HIDING THE CONTAINER
+					document.getElementById("container").style.display = "none";
+
+					// HIDING THE GO BACK BUTTON (DESKTOP AND MOBILE)
+					document.getElementsByClassName("gui_goback")[0].style.display = "none";
+					document.getElementsByClassName("gui_goback_mobile")[0].style.display = "none";
+
+					// HIDING THE DECREASE CYCLES BUTTON (DESKTOP AND MOBILE)
+					document.getElementsByClassName("gui_decrease")[0].style.display = "none";
+					document.getElementsByClassName("gui_decrease_mobile")[0].style.display = "none";
+
+					// HIDING THE INCREASE CYCLES BUTTON (DESKTOP AND MOBILE)
+					document.getElementsByClassName("gui_increase")[0].style.display = "none";
+					document.getElementsByClassName("gui_increase_mobile")[0].style.display = "none";
+
+					// HIDING THE RELOAD BUTTON (DESKTOP AND MOBILE)
+					document.getElementsByClassName("gui_reload")[0].style.display = "none";
+					document.getElementsByClassName("gui_reload_mobile")[0].style.display = "none";
+
+					// HIDING THE DOWNLOAD BUTTON (DESKTOP AND MOBILE)
+					document.getElementsByClassName("gui_download")[0].style.display = "none";
+					document.getElementsByClassName("gui_download_mobile")[0].style.display = "none";
+
+					// HIDING THE UPLOAD SAVE BUTTON (DESKTOP AND MOBILE)
+					document.getElementsByClassName("gui_uploadsave")[0].style.display = "none";
+					document.getElementsByClassName("gui_uploadsave_mobile")[0].style.display = "none";
+
+					// HIDING THE SOUND TOGGLE BUTTON (DESKTOP AND MOBILE)
+					document.getElementsByClassName("gui_sound")[0].style.display = "none";
+					document.getElementsByClassName("gui_sound_mobile")[0].style.display = "none";
+					}
+					catch(err)
+					{
+					}
+				}
+
+			function ROMState_DownloadFile()
+				{
+				try
+					{
+					// RUNNING THE FUNCTION THAT IS LOCATED WITHIN THE IFRAME DOCUMENT TO DOWNLOAD THE ROM STATE
+					document.getElementById("container").contentWindow.downloadROMState();
+					}
+					catch(err)
+					{
+					}
+				}
+
+			function ROMState_UploadFile()
+				{
+				try
+					{
+					// RUNNING THE FUNCTION THAT IS LOCATED WITHIN THE IFRAME DOCUMENT TO UPLOAD THE ROM STATE
+					document.getElementById("container").contentWindow.uploadROMState();
+					}
+					catch(err)
+					{
+					}
+				}
+
+			function ROMState_ToggleSound()
+				{
+				try
+					{
+					// RUNNING THE FUNCTION THAT IS LOCATED WITHIN THE IFRAME DOCUMENT TO TOGGLE THE SOUND STATUS
+					document.getElementById("container").contentWindow.toggleSound();
+					}
+					catch(err)
+					{
+					}
+				}
+
+			function decreaseCycles()
+				{
+				try
+					{
+					// RUNNING THE FUNCTION THAT IS LOCATED WITHIN THE IFRAME DOCUMENT TO DECREASE CYCLES
+					document.getElementById("container").contentWindow.decreaseCycles();
+					}
+					catch(err)
+					{
+					}
+				}
+
+			function increaseCycles()
+				{
+				try
+					{
+					// RUNNING THE FUNCTION THAT IS LOCATED WITHIN THE IFRAME DOCUMENT TO INCREASE CYCLES
+					document.getElementById("container").contentWindow.increaseCycles();
+					}
+					catch(err)
+					{
+					}
+				}
+
+			function goBackButtonResetIncrement()
+				{
+				try
+					{
+					// CLEARING THE MOVEMENTS IDLE TIMER
+					MOVEMENTS_IDLE = 0;
+
+					// CHECKING IF A GAME IS RUNNING
+					if (document.getElementById("container").style.display=="block")
+						{
+						// CHECKING IF IT IS A MOBILE DEVICE
+						if (isMobileDevice()==true)
+							{
+							// SHOWING THE DOWNLOAD BUTTON (FOR MOBILE DEVICES)
+							document.getElementsByClassName("gui_download_mobile")[0].style.display = "block";
+
+							// SHOWING THE UPLOAD SAVE BUTTON (FOR MOBILE DEVICES)
+							document.getElementsByClassName("gui_uploadsave_mobile")[0].style.display = "block";
+
+							// SHOWING THE SOUND TOGGLE BUTTON (FOR MOBILE DEVICES)
+							document.getElementsByClassName("gui_sound_mobile")[0].style.display = "block";
+
+							// CHECKING IF THE GAME IS A DOS GAME
+							if (DOSGAME==true)
+								{
+								// SHOWING THE DECREASE CYCLES BUTTON (FOR MOBILE DEVICES)
+								document.getElementsByClassName("gui_decrease_mobile")[0].style.display = "block";
+
+								// SHOWING THE INCREASE CYCLES BUTTON (FOR MOBILE DEVICES)
+								document.getElementsByClassName("gui_increase_mobile")[0].style.display = "block";
+								}
+							}
+							else
+							{
+							// SHOWING THE GO BACK BUTTON
+							document.getElementsByClassName("gui_goback")[0].style.display = "block";
+
+							// SHOWING THE RELOAD BUTTON
+							document.getElementsByClassName("gui_reload")[0].style.display = "block";
+
+							// SHOWING THE DOWNLOAD BUTTON
+							document.getElementsByClassName("gui_download")[0].style.display = "block";
+
+							// SHOWING THE UPLOAD SAVE BUTTON
+							document.getElementsByClassName("gui_uploadsave")[0].style.display = "block";
+
+							// SHOWING THE SOUND TOGGLE BUTTON
+							document.getElementsByClassName("gui_sound")[0].style.display = "block";
+
+							// CHECKING IF THE GAME IS A DOS GAME
+							if (DOSGAME==true)
+								{
+								// SHOWING THE DECREASE CYCLES BUTTON
+								document.getElementsByClassName("gui_decrease")[0].style.display = "block";
+
+								// SHOWING THE INCREASE CYCLES BUTTON
+								document.getElementsByClassName("gui_increase")[0].style.display = "block";
+								}
+							}
+						}
+					}
+					catch(err)
+					{
+					}
+				}
+
+			function goBackButtonTimerIncrement()
+				{
+				try
+					{
+					// UPDATING THE MOVEMENTS IDLE TIMER
+					MOVEMENTS_IDLE = MOVEMENTS_IDLE + 1;
+
+					// CHECKING THE MOVEMENTS IDLE TIMER IS EQUAL OR GREATER THAN 3 SECONDS
+					if (MOVEMENTS_IDLE >= 3)
+						{
+						// HIDING THE GO BACK BUTTON
+						document.getElementsByClassName("gui_goback")[0].style.display = "none";
+
+						// HIDING THE RELOAD BUTTON
+						document.getElementsByClassName("gui_reload")[0].style.display = "none";
+
+						// HIDING THE DOWNLOAD BUTTON
+						document.getElementsByClassName("gui_download")[0].style.display = "none";
+
+						// HIDING THE UPLOAD SAVE BUTTON
+						document.getElementsByClassName("gui_uploadsave")[0].style.display = "none";
+
+						// HIDING THE SOUND TOGGLE BUTTON
+						document.getElementsByClassName("gui_sound")[0].style.display = "none";
+
+						// CHECKING IF THE GAME IS A DOS GAME
+						if (DOSGAME==true)
+							{
+							// HIDING THE DECREASE CYCLES BUTTON
+							document.getElementsByClassName("gui_decrease")[0].style.display = "none";
+
+							// HIDING THE INCREASE CYCLES BUTTON
+							document.getElementsByClassName("gui_increase")[0].style.display = "none";
+							}
+						}
+					}
+					catch(err)
+					{
+					}
+				}
+
+			window.addEventListener("load", function()
+				{
+				// ENABLING THE UPLOAD ICON FUNCTIONALITY
+				document.getElementById("gui_controls_file").disabled = false;
+
+				// CLEARING THE SELECTED FILE VALUE
+				document.getElementById("gui_controls_file").value = null;
+
+				// UPDATING THE IFRAME SOURCE WITH A BLANK PAGE
+				document.getElementById("container").contentDocument.location.replace("about:blank");
+
+				// KEEPING FOCUS IN THE CONTAINER
+				setInterval(function()
+					{
+					document.getElementById("container").focus();
+					}, 250);
+
+				// KEEPING TRACK OF MOUSE CLICKS AND MOVEMENTS WHEN PLAYING IN ORDER TO KNOW WHEN TO HIDE/SHOW ALL THE ICONS
+				setInterval(goBackButtonTimerIncrement, 1000);
+
+				// SETTING FUNCTIONS THAT WILL BE CALLED WHEN THE USER CLICKS, DOUBLE CLICKS OR MOVES THE MOUSE IN ORDER TO SHOW THE SYSTEM ICONS
+				document.addEventListener("click", goBackButtonResetIncrement, false);
+				document.addEventListener("dblclick", goBackButtonResetIncrement, false);
+				document.addEventListener("mousemove", goBackButtonResetIncrement, false);
+
+				// CHECKING IF IT IS A MOBILE DEVICE
+				if (isMobileDevice()==true)
+					{
+					// CHECKING IF THE USER IS USING IOS. EMULATRIX IS NOT COMPATIBLE WITH IOS.
+					var usingiOS = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+					if (usingiOS==true)
+						{
+						// UPDATING THE LABEL SAYING THAT EMULATRIX IS NOT COMPATIBLE WITH IOS.
+						document.getElementsByClassName("gui_how_mobile_label")[0].innerHTML = STRING_HOW_MOBILE_IOS;
+						}
+
+					// SHOWING THE 'HOW DOES IT WORK' TEXT FOR MOBILE DEVICES
+					document.getElementsByClassName("gui_how_mobile")[0].style.display = "block";
+					}
+					else
+					{
+					// SHOWING THE 'HOW DOES IT WORK' TEXT FOR DESKTOP DEVICES
+					document.getElementsByClassName("gui_title_how_desktop")[0].style.display = "block";
+
+					// CHECKING IF THE USER IS USING SAFARI. EMULATRIX IS NOT COMPATIBLE WITH SAFARI.
+					var usingSafari = navigator.userAgent.toLowerCase().indexOf("safari")>-1 && navigator.userAgent.toLowerCase().indexOf("chrome")==-1;
+					if (usingSafari==true)
+						{
+						// SHOWING THE LABEL THAT WILL SAYS THAT EMULATRIX IS NOT COMPATIBLE WITH SAFARI.
+						document.getElementsByClassName("gui_safari")[0].style.display = "block";
+						}
+						else
+						{
+						// SHOWING THE KEYS FOR EACH EMULATOR FOR DESKTOP DEVICES
+						document.getElementsByClassName("gui_controls")[0].style.display = "block";
+						}
+					}
+
+				// CHECKING IF THE USER IS USING IOS OR SAFARI. EMULATRIX IS NOT COMPATIBLE WITH IOS OR SAFARI.
+				var usingiOS = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+				var usingSafari = navigator.userAgent.toLowerCase().indexOf("safari")>-1 && navigator.userAgent.toLowerCase().indexOf("chrome")==-1;
+				if (usingiOS==true || usingSafari==true)
+					{
+					// DISABLING THE UPLOADER ICON
+					document.getElementById("gui_uploader").className = "gui_uploader gui_uploader_ios";
+					}
+					else
+					{
+					// SETTING WHAT WILL HAPPEN WHEN THE USER CLICKS ON THE UPLOADER ICON
+					document.getElementById("gui_uploader").addEventListener("click",function(event){document.getElementById("gui_controls_file").click()});
+					}
+
+				// SHOWING THE UPLOADER ICON
+				document.getElementById("gui_uploader").style.display = "block";
+
+				// UPDATING THE EMAIL ADDRESS CONTAINER
+				document.getElementsByClassName("gui_title_email_value")[0].href = atob("bWFpbHRvOmluZm9AZW11bGF0cml4LmNvbQ==");
+				document.getElementsByClassName("gui_title_email_value")[0].innerHTML = atob("aW5mb0BlbXVsYXRyaXguY29t");
+
+				// SETTING THE TITLES FOR EACH BUTTON
+				document.getElementsByClassName("gui_uploader")[0].title = STRING_SELECTGAME;
+				document.getElementsByClassName("gui_sound")[0].title = STRING_SOUND;
+				document.getElementsByClassName("gui_goback")[0].title = STRING_GOBACK;
+				document.getElementsByClassName("gui_reload")[0].title = STRING_RELOAD;
+				document.getElementsByClassName("gui_decrease")[0].title = STRING_DECREASE;
+				document.getElementsByClassName("gui_increase")[0].title = STRING_INCREASE;
+
+				// SETTING WHAT WILL HAPPEN WHEN THE USER MOUSE OVER/OUT THE HOW DOES IT WORK LABEL
+				document.getElementsByClassName("gui_title_how_desktop_question")[0].addEventListener("mouseover",function(event){document.getElementsByClassName("gui_title_how_desktop_label")[0].style.display="block"});
+				document.getElementsByClassName("gui_title_how_desktop_question")[0].addEventListener("mouseout",function(event){document.getElementsByClassName("gui_title_how_desktop_label")[0].style.display="none"});
+
+				// SETTING WHAT WILL HAPPEN WHEN THE USER CLICKS ON A ITEM
+				document.getElementsByClassName("gui_goback")[0].addEventListener("click",function(event){goBack()});
+				document.getElementsByClassName("gui_decrease")[0].addEventListener("click",function(event){decreaseCycles()});
+				document.getElementsByClassName("gui_increase")[0].addEventListener("click",function(event){increaseCycles()});
+				document.getElementsByClassName("gui_sound")[0].addEventListener("click",function(event){ROMState_ToggleSound()});
+				document.getElementsByClassName("gui_download")[0].addEventListener("click",function(event){ROMState_DownloadFile()});
+				document.getElementsByClassName("gui_uploadsave")[0].addEventListener("click",function(event){ROMState_UploadFile()});
+				document.getElementsByClassName("gui_reload")[0].addEventListener("click",function(event){reload()});
+
+				// SETTING WHAT HAPPEN WHEN THE USER TOUCHES AN ITEM
+				document.getElementsByClassName("gui_goback_mobile")[0].addEventListener("touchstart",function(event){goBack()});
+				document.getElementsByClassName("gui_decrease_mobile")[0].addEventListener("click",function(event){decreaseCycles()});
+				document.getElementsByClassName("gui_increase_mobile")[0].addEventListener("click",function(event){increaseCycles()});
+				document.getElementsByClassName("gui_sound_mobile")[0].addEventListener("click",function(event){ROMState_ToggleSound()});
+				document.getElementsByClassName("gui_download_mobile")[0].addEventListener("touchstart",function(event){ROMState_DownloadFile()});
+				document.getElementsByClassName("gui_uploadsave_mobile")[0].addEventListener("touchstart",function(event){ROMState_UploadFile()});
+				document.getElementsByClassName("gui_reload_mobile")[0].addEventListener("touchstart",function(event){reload()});
+				
+				
+				});
+		</script>
+
+		<iframe id="container" src="about:blank"></iframe>
+		<div class="gui_goback"></div>
+		<div class="gui_goback_mobile"><div class="gui_goback_mobile_icon"></div></div>
+		<div class="gui_decrease"></div>
+		<div class="gui_decrease_mobile"><div class="gui_decrease_mobile_icon"></div></div>
+		<div class="gui_increase"></div>
+		<div class="gui_increase_mobile"><div class="gui_increase_mobile_icon"></div></div>
+		<div class="gui_sound"></div>
+		<div class="gui_sound_mobile"><div class="gui_sound_mobile_icon"></div></div>
+		<div class="gui_download"></div>
+		<div class="gui_download_mobile"><div class="gui_download_mobile_icon"></div></div>
+		<div class="gui_uploadsave"></div>
+		<div class="gui_uploadsave_mobile"><div class="gui_uploadsave_mobile_icon"></div></div>
+		<div class="gui_reload"></div>
+		<div class="gui_reload_mobile"><div class="gui_reload_mobile_icon"></div></div>
+		<div class="gui_pleasewait"><div class="gui_pleasewait_title"><script>document.write(STRING_READINGFILE);</script></div><div class="pleasewait"><div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></div>
+
+		<div class="gui_container">
+			<div class="gui_background"></div>
+			<div class="gui_title">
+				<div class="gui_title_logo"></div>
+				<div class="gui_title_how_desktop"><span class="gui_title_how_desktop_question"><script>document.write(STRING_HOW_DESKTOP1);</script></span></div>
+				<div class="gui_title_how_desktop_label"><script>document.write(STRING_HOW_DESKTOP2);</script></div>
+				<div class="gui_title_email"><a class="gui_title_email_value" href="#"></a></div>
+			</div>
+			<div class="gui_how_mobile"><span class="gui_how_mobile_label"><script>document.write(STRING_HOW_MOBILE)</script></span></div>
+			<div class="gui_safari"><span class="gui_safari_label"><script>document.write(STRING_SAFARI)</script></span></div>
+			<div class="gui_controls">
+				<div class="gui_controls_center">
+					<table class="gui_controls_table">
+						<tr>
+							<td class="gui_controls_table_field1 gui_controls_table_column1">
+								<div class="gui_controls_segagenesis"></div>
+								START = ENTER<br />
+								A, B, C = A, S, D<br />
+								X, Y, Z = Q, W, E
+							</td>
+							<td class="gui_controls_table_field1 gui_controls_table_column2">
+								<div class="gui_controls_supernintendo"></div>
+								START = E<br />
+								SELECT = R<br />
+								B, A, Y, X, L, R = Z, X, A, S, Q, W
+							</td>
+							<td class="gui_controls_table_field1 gui_controls_table_column3">
+								<div class="gui_controls_nintendo"></div>
+								START = S<br />
+								SELECT = A<br />
+								B, A = Z, X
+							</td>
+						</tr>
+						<tr>
+							<td class="gui_controls_table_field2 gui_controls_table_column1">
+								<div class="gui_controls_gameboy"></div>
+								START = S<br />
+								SELECT = A<br />
+								B, A, L, R = Z, X, Q, W
+							</td>
+							<td class="gui_controls_table_field2 gui_controls_table_column2">
+								<div class="gui_controls_mame32"></div>
+								START = ENTER<br />
+								<script>document.write(STRING_INSERTCOIN);</script><br />
+								A, B, C, X, Y, Z = A, S, D, Q, W, E
+							</td>
+							<td class="gui_controls_table_field2 gui_controls_table_column3">
+								<div class="gui_controls_dosbox"></div>
+								<script>document.write(STRING_KEYBOARDANDMOUSE);</script>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="gui_uploader" id="gui_uploader"></div>
+			<input type="file" id="gui_controls_file" disabled onchange="runEmulator(event.target.files);"/>
+		</div>
+	</body>
+</html>
