@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<style>
+		html,
+		body {
+			background-color: #000;
+			margin: 0;
+			height: 100%;
+			overflow-y: hidden;
+		}
+	</style>
+</head>
+<body>
+	<button id="start">start</button>
+	<script src="peerjs.min.js"></script>
+	<script>
+		var peer = new Peer();
+		var seed = location.search.split('=')[1];
+
+		peer.on('open', function(id) {
+			if (!seed) {
+				return
+			}
+
+			var conn = peer.connect(seed);
+
+			conn.on('open', function () {
+				onOpen(conn);
+			});
+		});
+
+		function onOpen (conn) {
+			var state = {
+				fire: false,
+				alter: false,
+				up: false,
+				down: false,
+				right: false,
+				left: false,
+			};
+
+			setInterval(function(){
+				conn.send(state);
+			}, 25);
+
+			document.addEventListener('keydown', function (e) {
+				switch (e.key) {
+					case 'ArrowUp':
+						state.up = true;
+						break;
+					case 'ArrowLeft':
+						state.left = true;
+						break;
+					case 'ArrowDown':
+						state.down = true;
+						break;
+					case 'ArrowRight':
+						state.right = true;
+						break;
+					case 'z':
+						state.fire = true;
+						break;
+					case 'x':
+						state.alter = true;
+						break;
+				}
+			});
+
+			document.addEventListener('keyup', function (e) {
+				switch (e.key) {
+					case 'ArrowUp':
+						state.up = false;
+						break;
+					case 'ArrowLeft':
+						state.left = false;
+						break;
+					case 'ArrowDown':
+						state.down = false;
+						break;
+					case 'ArrowRight':
+						state.right = false;
+						break;
+					case 'z':
+						state.fire = false;
+						break;
+					case 'x':
+						state.alter = false;
+						break;
+				}
+			});
+		}
+	</script>
+</body>
+</html>
