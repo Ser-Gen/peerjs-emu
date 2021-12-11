@@ -43,6 +43,17 @@
 					conn.send(state);
 				}, 25);
 
+				if (location.hash === '#a') {
+					conn.send({
+						id: 'a',
+					});
+				}
+				else {
+					conn.send({
+						id: 'b',
+					});
+				}
+
 				document.addEventListener('keydown', function (e) {
 					switch (e.key) {
 						case 'ArrowUp':
@@ -174,6 +185,7 @@
 					left: 0;
 					width: 100%;
 					height: 100%;
+					object-fit: contain;
 				`;
 
 				document.body.appendChild(c);
